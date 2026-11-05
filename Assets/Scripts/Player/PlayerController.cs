@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
 
     public Vector2 moveInput;
     private Vector3 currentVelocity;
+    private Vector3 finalMove;
+    public Vector3 impulseVelocity;
 
     private float speed;
     private bool isGrounded;
@@ -149,22 +151,22 @@ public class PlayerController : MonoBehaviour
         }
 
         //Final movement to apply
-        Vector3 finalMove = currentVelocity;
+        finalMove = currentVelocity;
         finalMove.y = verticalVelocity;
 
         //Debug.Log(finalMove + " " + currentVelocity + " " + speed + " " + isGrounded);
-        if (Input.GetKeyDown(KeyCode.E)) AddImpulse(finalMove);
-        characterController.Move(finalMove * Time.deltaTime);
+        //if (Input.GetKeyDown(KeyCode.E)) AddImpulse(finalMove);
+        characterController.Move((finalMove + impulseVelocity) * Time.deltaTime);
         
     }
 
-    Vector3 AddImpulse(Vector3 vectorImpulse)
+    public Vector3 AddImpulse(Vector3 direction)
     {
-        Vector3 impulseDirection = -camTransform.forward;
-        Debug.Log(impulseDirection);
-        Debug.DrawRay(camTransform.position, impulseDirection * 2f, Color.blue);
+        Debug.Log("AddImpulse");
 
-        return impulseDirection;
+        Vector3 impulseAmount = direction * 10f;
+
+        return impulseAmount;
     }
 
 }

@@ -50,7 +50,7 @@ public class CameraController : MonoBehaviour
         //Smoothly set desired roll
         finalRoll = Mathf.LerpAngle(currentRoll, targetRoll, 1f - Mathf.Exp(-5f * Time.deltaTime));
 
-        Debug.Log(new Vector2(horizontalInput, targetRoll));
+        //Debug.Log(new Vector2(horizontalInput, targetRoll));
 
         Debug.DrawRay(transform.position, transform.right * 2f, Color.red);
         Debug.DrawRay(transform.position, -transform.right * 2f, Color.red);
