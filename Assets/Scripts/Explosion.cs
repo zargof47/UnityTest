@@ -8,6 +8,7 @@ public class Explosion : MonoBehaviour
     [SerializeField] private PlayerController playerController;
 
     [SerializeField] private float hitRadius = 10f;
+    [SerializeField] private float force = 20f;
 
     private Vector3 direction;
 
@@ -30,7 +31,7 @@ public class Explosion : MonoBehaviour
             if (hit.collider == player.GetComponent<Collider>())
             {
                 Debug.Log("Hit Player: " + direction + hit.collider);
-                playerController.impulseVelocity = playerController.AddImpulse(direction);
+                playerController.impulseVelocity = playerController.AddImpulse(direction, force);
             }
             else
             {

@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float initialFallVelocity = -2f;
 
     [SerializeField] private float response = 20f;
+    [SerializeField] private float impulseDecay = 5f;
 
     [SerializeField] private Transform camTransform;
     [SerializeField] private CharacterController characterController;
@@ -136,8 +137,8 @@ public class PlayerController : MonoBehaviour
         }
 
         //Get direction Vector/Arrow, Clamp it under 1 to prevent faster strafing, and then apply speed
-        Vector3 direction = camTransform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
-        direction = Vector3.ClampMagnitude(direction, 1f);
+        Vector3 directionUnclamped = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
+        Vector3 direction = Vector3.ClampMagnitude(directionUnclamped, 1f);
         Vector3 targetVelocity = direction * speed;
         
         //smoothen movement by lerping
@@ -156,15 +157,19 @@ public class PlayerController : MonoBehaviour
 
         //Debug.Log(finalMove + " " + currentVelocity + " " + speed + " " + isGrounded);
         //if (Input.GetKeyDown(KeyCode.E)) AddImpulse(finalMove);
+        impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
         characterController.Move((finalMove + impulseVelocity) * Time.deltaTime);
-        
+
+        Debug.Log($"finalMove: {finalMove}, verticalVelocity: {verticalVelocity}, impulseVelocity: {impulseVelocity}, direction: {direction}, directionUnclamped: {directionUnclamped}");
+
+
     }
 
-    public Vector3 AddImpulse(Vector3 direction)
+    public Vector3 AddImpulse(Vector3 direction, float force)
     {
         Debug.Log("AddImpulse");
 
-        Vector3 impulseAmount = direction * 10f;
+        Vector3 impulseAmount = direction * force;
 
         return impulseAmount;
     }
