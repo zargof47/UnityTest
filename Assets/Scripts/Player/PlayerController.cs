@@ -4,20 +4,19 @@ using static UnityEngine.ProBuilder.AutoUnwrapSettings;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private bool lerp = false;
-    [SerializeField] private bool acceleration = false;
-
     [SerializeField] private bool enableAirStrafing = true;
 
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 5f;
-    [SerializeField] private float addedSpeed = 5f;
+    [SerializeField] private float maxAirSpeed = 5f;
 
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = 12f;
     [SerializeField] private float initialFallVelocity = -2f;
 
-    [SerializeField] private float response = 20f;
+    [SerializeField] private float groundAccel = 10f;
+    [SerializeField] private float airAccel = 5f;
+
     [SerializeField] private float impulseDecayAir = 5f;
     [SerializeField] private float impulseDecay = 5f;
 
@@ -123,50 +122,41 @@ public class PlayerController : MonoBehaviour
     {
         //Set Speed
         speed = walkSpeed;
-        if (isSprinting && isGrounded)
+        if (isSprinting)
         {
             speed = runSpeed;
         }
-        else if (!isSprinting && isGrounded)
+        else if (!isSprinting)
         {
             speed = walkSpeed;
         }
-        else if (isSprinting && !isGrounded)
-        {
-            speed = runSpeed + addedSpeed;
-        }
-        else if (!isSprinting && !isGrounded)
-        {
-            speed = walkSpeed + addedSpeed;
-        }
 
-        if (lerp)
-        {
-            //LerpedMovement();
-        }
-        else if (acceleration)
-        {
-            acceleratedMovement();
-        }
-    }
 
-    void LerpedMovement()
-    {
+
 
         //Get direction Vector/Arrow, Clamp it under 1 to prevent faster strafing, and then apply speed
         Vector3 directionUnclamped = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
-        Vector3 direction = Vector3.ClampMagnitude(directionUnclamped, 1f);
+        Vector3 direction = directionUnclamped.normalized;
         Vector3 targetVelocity = direction * speed;
 
-        //smoothen movement by lerping, currentVelocity allows smoothing from 0 to targetVelocity which is the exact value that the player is trying to move at.
-        if (!enableAirStrafing)
-        { //not enabled, only strafing on ground
-            if (isGrounded) currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, 1f - Mathf.Exp(-response * Time.deltaTime));
+        if (isGrounded)
+        {
+            currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, 1f - Mathf.Exp(-groundAccel * Time.deltaTime));
         }
         else
-        { // enabled
-            currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, 1f - Mathf.Exp(-response * Time.deltaTime));
+        {
+            currentVelocity += direction * airAccel * Time.deltaTime;
         }
+        float wishSpeed = currentVelocity.magnitude;
+        float currentSpeed = Vector3.Dot(currentVelocity, direction);
+        float addSpeed = maxAirSpeed - currentSpeed; //returns how much speed is needed
+
+        //Debug.Log($"direction: {direction}, currentVelocity; {currentVelocity}, totalSpeed: {totalSpeed}, wishSpeed: {wishSpeed}");
+        Debug.Log($"wishSpeed: {wishSpeed}, currentSpeed: {currentSpeed}");
+
+
+
+
 
         //Final movement to apply
         finalMove = currentVelocity;
@@ -177,17 +167,8 @@ public class PlayerController : MonoBehaviour
 
         characterController.Move((finalMove + impulseVelocity) * Time.deltaTime);
 
-        //Debug.Log(impulseVelocity);
-        Debug.Log($"finalMove: {finalMove}, verticalVelocity: {verticalVelocity}, currentVelocity: {currentVelocity}, targetVelocity: {targetVelocity}, impulseVelocity: {impulseVelocity}, direction: {direction}, directionUnclamped: {directionUnclamped}, speed: {speed}");
+        //Debug.Log($"finalMove: {finalMove}, verticalVelocity: {verticalVelocity}, currentVelocity: {currentVelocity}, targetVelocity: {targetVelocity}, impulseVelocity: {impulseVelocity}, direction: {direction}, directionUnclamped: {directionUnclamped}, speed: {speed}");
 
-    }
-
-    void acceleratedMovement()
-    {
-        Vector3 direction = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
-        direction = Vector3.ClampMagnitude(direction, 1f);
-
-        characterController.Move(direction * speed);
     }
 
 
