@@ -148,8 +148,12 @@ public class PlayerController : MonoBehaviour
             currentVelocity += direction * airAccel * Time.deltaTime;
         }
         float wishSpeed = currentVelocity.magnitude;
+
         float currentSpeed = Vector3.Dot(currentVelocity, direction);
         float addSpeed = maxAirSpeed - currentSpeed; //returns how much speed is needed
+        if (addSpeed > 30f) addSpeed = 30f;
+
+        
 
         //Debug.Log($"direction: {direction}, currentVelocity; {currentVelocity}, totalSpeed: {totalSpeed}, wishSpeed: {wishSpeed}");
         Debug.Log($"wishSpeed: {wishSpeed}, currentSpeed: {currentSpeed}");
