@@ -8,14 +8,18 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private float runSpeed = 5f;
-    [SerializeField] private float maxAirSpeed = 5f;
 
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = 12f;
     [SerializeField] private float initialFallVelocity = -2f;
 
-    [SerializeField] private float groundAccel = 10f;
+    [SerializeField] private float groundAccel = 5f;
+    [SerializeField] private float maxGroundSpeed = 5f;
+    [SerializeField] private float groundFriction = 2f;
+
     [SerializeField] private float airAccel = 5f;
+    [SerializeField] private float maxAirSpeed = 5f;
+    [SerializeField] private float airFriction = 2f;
 
     [SerializeField] private float impulseDecayAir = 5f;
     [SerializeField] private float impulseDecay = 5f;
@@ -33,6 +37,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 impulseVelocity;
 
     private float speed;
+    private float accel;
     private bool isGrounded;
     private bool isSprinting = false;
     private float verticalVelocity; 
@@ -132,35 +137,22 @@ public class PlayerController : MonoBehaviour
         }
 
 
-
+        //direction = wishDir
 
         //Get direction Vector/Arrow, Clamp it under 1 to prevent faster strafing, and then apply speed
         Vector3 directionUnclamped = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
         Vector3 direction = directionUnclamped.normalized;
         Vector3 targetVelocity = direction * speed;
 
+        //instead of slowly moving towards targetvelocity automatically, you add speed instead until you reach that.
         if (isGrounded)
         {
-            currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, 1f - Mathf.Exp(-groundAccel * Time.deltaTime));
+            GroundAccelerate(direction);
         }
         else
         {
-            currentVelocity += direction * airAccel * Time.deltaTime;
+            AirAccelerate(direction);
         }
-        float wishSpeed = currentVelocity.magnitude;
-
-        float currentSpeed = Vector3.Dot(currentVelocity, direction);
-        float addSpeed = maxAirSpeed - currentSpeed; //returns how much speed is needed
-        if (addSpeed > 30f) addSpeed = 30f;
-
-        
-
-        //Debug.Log($"direction: {direction}, currentVelocity; {currentVelocity}, totalSpeed: {totalSpeed}, wishSpeed: {wishSpeed}");
-        Debug.Log($"wishSpeed: {wishSpeed}, currentSpeed: {currentSpeed}");
-
-
-
-
 
         //Final movement to apply
         finalMove = currentVelocity;
@@ -175,6 +167,42 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    void AirAccelerate(Vector3 direction)
+    {
+        float currentSpeed = Vector3.Dot(currentVelocity, direction);
+        float addSpeed = maxAirSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+        if (addSpeed > 0f) //if there is still room to add speed
+        {
+            accel = airAccel * maxAirSpeed * Time.deltaTime;
+            accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
+            currentVelocity += direction * accel;  //(0, 0, 3) + (0, 0, 0.668) = (0, 0, 3.668)
+        }
+
+        Vector3 friction = currentVelocity * airFriction * Time.deltaTime;
+        currentVelocity -= friction;
+        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, direction: {direction}, acceleration: {accel}");
+        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, addSpeed: {maxAirSpeed} - {currentSpeed}, accel: {accel}, direction: {direction}");
+    }
+
+    void GroundAccelerate(Vector3 direction)
+    {
+
+        float currentSpeed = Vector3.Dot(currentVelocity, direction);
+        float addSpeed = maxGroundSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+        if (addSpeed > 0f) //if there is still room to add speed
+        {
+            accel = groundAccel * maxGroundSpeed * Time.deltaTime;
+            accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
+            currentVelocity += direction * accel;  //(0, 0, 3) + (0, 0, 0.668) = (0, 0, 3.668)
+        }
+
+
+        Vector3 friction = currentVelocity * groundFriction * Time.deltaTime;
+        currentVelocity -= friction;
+
+        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, direction: {direction}, acceleration: {accel}");
+        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, addSpeed: {maxAirSpeed} - {currentSpeed}, accel: {accel}, direction: {direction}");
+    }
 
     public Vector3 AddImpulse(Vector3 direction, float force)
     {
