@@ -6,8 +6,8 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private bool enableAirStrafing = true;
 
-    [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private float runSpeed = 5f;
+    [SerializeField] private float walkSpeed = 12f;
+    [SerializeField] private float runSpeed = 16f;
 
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = 12f;
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxGroundSpeed = 5f;
     [SerializeField] private float groundFriction = 2f;
 
-    [SerializeField] private float airAccel = 5f;
+    [SerializeField] private float airAccel = 10f;
     [SerializeField] private float maxAirSpeed = 5f;
     [SerializeField] private float airFriction = 2f;
 
@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
     public Vector3 impulseVelocity;
 
     private float speed;
-    private float accel;
     private bool isGrounded;
     private bool isSprinting = false;
     private float verticalVelocity; 
@@ -141,8 +140,8 @@ public class PlayerController : MonoBehaviour
 
         //Get direction Vector/Arrow, Clamp it under 1 to prevent faster strafing, and then apply speed
         Vector3 directionUnclamped = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
-        Vector3 direction = directionUnclamped.normalized;
-        Vector3 targetVelocity = direction * speed;
+        //Vector3 directionUnclamped = camTransform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
+        Vector3 direction = directionUnclamped.normalized; // makes it 1
 
         //instead of slowly moving towards targetvelocity automatically, you add speed instead until you reach that.
         if (isGrounded)
@@ -169,17 +168,22 @@ public class PlayerController : MonoBehaviour
 
     void AirAccelerate(Vector3 direction)
     {
-        float currentSpeed = Vector3.Dot(currentVelocity, direction);
-        float addSpeed = maxAirSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+        float wishSpeed = direction.magnitude * speed;
+        maxAirSpeed = wishSpeed;
+        if (wishSpeed > 2f) wishSpeed = 2f;
+
+        float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
+        float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
         if (addSpeed > 0f) //if there is still room to add speed
         {
-            accel = airAccel * maxAirSpeed * Time.deltaTime;
+            float accel = airAccel * maxAirSpeed * Time.deltaTime;
+            if (accel > addSpeed) accel = addSpeed;
             accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
-            currentVelocity += direction * accel;  //(0, 0, 3) + (0, 0, 0.668) = (0, 0, 3.668)
+            currentVelocity += direction * accel; //add to velocity
         }
 
-        Vector3 friction = currentVelocity * airFriction * Time.deltaTime;
-        currentVelocity -= friction;
+        //Vector3 friction = currentVelocity * airFriction * Time.deltaTime;
+        //currentVelocity -= friction;
         //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, direction: {direction}, acceleration: {accel}");
         //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, addSpeed: {maxAirSpeed} - {currentSpeed}, accel: {accel}, direction: {direction}");
     }
@@ -187,13 +191,18 @@ public class PlayerController : MonoBehaviour
     void GroundAccelerate(Vector3 direction)
     {
 
-        float currentSpeed = Vector3.Dot(currentVelocity, direction);
-        float addSpeed = maxGroundSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+        float wishSpeed = direction.magnitude * speed;
+        maxGroundSpeed = wishSpeed;
+        if (wishSpeed > 2f) wishSpeed = 2f;
+
+        float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
+        float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
         if (addSpeed > 0f) //if there is still room to add speed
         {
-            accel = groundAccel * maxGroundSpeed * Time.deltaTime;
+            float accel = groundAccel * maxGroundSpeed * Time.deltaTime;
+            if (accel > addSpeed) accel = addSpeed;
             accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
-            currentVelocity += direction * accel;  //(0, 0, 3) + (0, 0, 0.668) = (0, 0, 3.668)
+            currentVelocity += direction * accel; //add to velocity
         }
 
 
