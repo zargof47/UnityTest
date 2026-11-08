@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float walkSpeed = 12f;
     [SerializeField] private float runSpeed = 16f;
+    [SerializeField] private float wishCap = 4f;
 
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = 12f;
@@ -162,7 +163,7 @@ public class PlayerController : MonoBehaviour
 
         characterController.Move((finalMove + impulseVelocity) * Time.deltaTime);
 
-        //Debug.Log($"finalMove: {finalMove}, verticalVelocity: {verticalVelocity}, currentVelocity: {currentVelocity}, targetVelocity: {targetVelocity}, impulseVelocity: {impulseVelocity}, direction: {direction}, directionUnclamped: {directionUnclamped}, speed: {speed}");
+ 
 
     }
 
@@ -182,10 +183,7 @@ public class PlayerController : MonoBehaviour
             currentVelocity += direction * accel; //add to velocity
         }
 
-        //Vector3 friction = currentVelocity * airFriction * Time.deltaTime;
-        //currentVelocity -= friction;
-        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, direction: {direction}, acceleration: {accel}");
-        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, addSpeed: {maxAirSpeed} - {currentSpeed}, accel: {accel}, direction: {direction}");
+        //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
     }
 
     void GroundAccelerate(Vector3 direction)
@@ -193,7 +191,7 @@ public class PlayerController : MonoBehaviour
 
         float wishSpeed = direction.magnitude * speed;
         maxGroundSpeed = wishSpeed;
-        if (wishSpeed > 2f) wishSpeed = 2f;
+        if (wishSpeed > 8f) wishSpeed = 8f;
 
         float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
         float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
@@ -209,8 +207,7 @@ public class PlayerController : MonoBehaviour
         Vector3 friction = currentVelocity * groundFriction * Time.deltaTime;
         currentVelocity -= friction;
 
-        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, direction: {direction}, acceleration: {accel}");
-        //Debug.Log($"currentVelocity: {currentVelocity}, currentSpeed: {currentSpeed}, addSpeed: {maxAirSpeed} - {currentSpeed}, accel: {accel}, direction: {direction}");
+        //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
     }
 
     public Vector3 AddImpulse(Vector3 direction, float force)
