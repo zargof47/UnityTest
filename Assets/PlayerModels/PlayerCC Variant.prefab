@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8879990267738027519
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.95031226
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.7500002
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -7.5664806
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 277928551741678459, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 280574044291740199, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: maxTiltAngle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1131273969752976949, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: m_Name
+      value: PlayerCC Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: gravity
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: airAccel
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: runSpeed
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: jumpForce
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: walkSpeed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: addedSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: airFriction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: groundAccel
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: maxAirSpeed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: acceleration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: impulseDecay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: groundFriction
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: maxGroundSpeed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: impulseDecayAir
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1974452898044190323, guid: fee736e38c1ea7148b639080beda0093, type: 3}
+      propertyPath: enableAirStrafing
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fee736e38c1ea7148b639080beda0093, type: 3}
