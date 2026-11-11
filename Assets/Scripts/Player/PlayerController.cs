@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 using static UnityEngine.ProBuilder.AutoUnwrapSettings;
 
 public class PlayerController : MonoBehaviour
@@ -31,6 +32,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
     [SerializeField] private InputActionReference sprintAction;
+
+    [SerializeField] private TextMeshProUGUI textMeshProUGUI;
 
     public Vector2 moveInput;
     private Vector3 currentVelocity; 
@@ -79,6 +82,8 @@ public class PlayerController : MonoBehaviour
 
         HandleGravity();
         HandleMovement();
+
+        textMeshProUGUI.text = Mathf.RoundToInt(currentVelocity.magnitude).ToString();
     }
 
 
@@ -177,7 +182,7 @@ public class PlayerController : MonoBehaviour
         float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
         if (addSpeed > 0f) //if there is still room to add speed
         {
-            float accel = airAccel * maxAirSpeed * Time.deltaTime;
+            float accel = maxAirSpeed * airAccel * Time.deltaTime;
             if (accel > addSpeed) accel = addSpeed;
             accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
             currentVelocity += direction * accel; //add to velocity
@@ -191,13 +196,13 @@ public class PlayerController : MonoBehaviour
 
         float wishSpeed = direction.magnitude * speed;
         maxGroundSpeed = wishSpeed;
-        if (wishSpeed > 8f) wishSpeed = 8f;
+        if (wishSpeed > 2f) wishSpeed = 2f;
 
         float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
-        float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+        float addSpeed = maxGroundSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
         if (addSpeed > 0f) //if there is still room to add speed
         {
-            float accel = groundAccel * maxGroundSpeed * Time.deltaTime;
+            float accel = maxGroundSpeed * groundAccel * Time.deltaTime;
             if (accel > addSpeed) accel = addSpeed;
             accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
             currentVelocity += direction * accel; //add to velocity
