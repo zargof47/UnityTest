@@ -9,6 +9,7 @@ public class Explosion : MonoBehaviour
 
     [SerializeField] private float maxRange = 10f;
     [SerializeField] private float force = 20f;
+    [SerializeField] public bool explode = false;
 
     private Vector3 direction;
     private float distance;
@@ -18,14 +19,14 @@ public class Explosion : MonoBehaviour
     {
         direction = (player.transform.position - transform.position).normalized;
         
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) || explode)
         {
             Explode();
             Debug.Log("E pressed");
         }
     }
 
-    void Explode()
+    public void Explode()
     {
         float appliedForce = force;
 

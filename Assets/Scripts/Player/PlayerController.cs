@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textMeshProUGUI;
 
     public Vector2 moveInput;
-    private Vector3 currentVelocity; 
+    public Vector3 currentVelocity; 
     private Vector3 finalMove;
     public Vector3 impulseVelocity;
 
@@ -83,7 +83,8 @@ public class PlayerController : MonoBehaviour
         HandleGravity();
         HandleMovement();
 
-        textMeshProUGUI.text = Mathf.RoundToInt(currentVelocity.magnitude).ToString();
+        //textMeshProUGUI.text = Mathf.RoundToInt(characterController.velocity.magnitude).ToString();
+        textMeshProUGUI.text = ($"{characterController.velocity}, {Mathf.RoundToInt(characterController.velocity.magnitude)}");
     }
 
 
