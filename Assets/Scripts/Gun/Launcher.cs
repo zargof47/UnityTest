@@ -42,7 +42,7 @@ public class Launcher : MonoBehaviour
     void FixedUpdate()
     {
         addVelocity = playerController.currentVelocity + camTransform.TransformDirection(Vector3.forward * fireForce);
-        addVelocity = Vector3.Lerp(addVelocity, Vector3.zero, 1f - Mathf.Exp(-5f * Time.fixedDeltaTime));
+        //addVelocity = Vector3.Lerp(addVelocity, Vector3.zero, 1f - Mathf.Exp(-5f * Time.fixedDeltaTime));
         
     }
 

@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private Transform camTransform;
     [SerializeField] private CharacterController characterController;
+    [SerializeField] private Collider collider;
 
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
@@ -43,7 +44,12 @@ public class PlayerController : MonoBehaviour
     private float speed;
     private bool isGrounded;
     private bool isSprinting = false;
-    private float verticalVelocity; 
+    private float verticalVelocity;
+
+
+
+    private int maxBounces = 5;
+    private float skinWidth = 0.015f;
 
     void OnEnable()
     {
@@ -84,7 +90,7 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
 
         //textMeshProUGUI.text = Mathf.RoundToInt(characterController.velocity.magnitude).ToString();
-        textMeshProUGUI.text = ($"{characterController.velocity}, {Mathf.RoundToInt(characterController.velocity.magnitude)}");
+        textMeshProUGUI.text = ($"{Mathf.RoundToInt(verticalVelocity)}, {Mathf.RoundToInt(new Vector3(characterController.velocity.x, 0f, characterController.velocity.z).magnitude)}");
     }
 
 
@@ -123,6 +129,7 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = initialFallVelocity;
+            impulseVelocity.y = 0f;
         }
 
         //when not grounded, (Jumping) pull the player down
@@ -133,14 +140,14 @@ public class PlayerController : MonoBehaviour
     {
         //Set Speed
         speed = walkSpeed;
-        if (isSprinting)
+        /*if (isSprinting)
         {
             speed = runSpeed;
         }
         else if (!isSprinting)
         {
             speed = walkSpeed;
-        }
+        }*/
 
 
         //direction = wishDir
@@ -160,16 +167,31 @@ public class PlayerController : MonoBehaviour
             AirAccelerate(direction);
         }
 
+        Debug.DrawRay(transform.position, currentVelocity, Color.pink);
+        Debug.DrawRay(transform.position, transform.up, Color.blue);
+
+        if (Physics.Raycast(transform.position, currentVelocity, out RaycastHit hit, direction.magnitude))
+        {
+            
+            Vector3 baseVector = currentVelocity.normalized * (hit.distance - characterController.skinWidth);
+            Vector3 leftoverVel = currentVelocity - baseVector; //leftover vel behind wall\
+
+            //vector to project
+            float mag = leftoverVel.magnitude;
+            leftoverVel = Vector3.ProjectOnPlane(leftoverVel, hit.normal).normalized;
+            leftoverVel *= mag; //scale correctly onto plane/wall
+
+            currentVelocity = leftoverVel;
+        }
+
         //Final movement to apply
-        finalMove = currentVelocity;
-        finalMove.y = verticalVelocity;
+        finalMove = currentVelocity + impulseVelocity;
+        finalMove.y = verticalVelocity + impulseVelocity.y;
 
         if (!isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecayAir * Time.deltaTime));
         if (isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
 
-        characterController.Move((finalMove + impulseVelocity) * Time.deltaTime);
-
- 
+        characterController.Move((finalMove) * Time.deltaTime);
 
     }
 
@@ -224,5 +246,7 @@ public class PlayerController : MonoBehaviour
 
         return impulseAmount;
     }
+
+
 
 }
