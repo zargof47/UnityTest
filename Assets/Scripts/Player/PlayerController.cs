@@ -1,6 +1,7 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
+using UnityEngine.ProBuilder;
 using static UnityEngine.ProBuilder.AutoUnwrapSettings;
 
 public class PlayerController : MonoBehaviour
@@ -50,6 +51,7 @@ public class PlayerController : MonoBehaviour
 
     private int maxBounces = 5;
     private float skinWidth = 0.015f;
+    private float maxSlopeAngle = 55;
 
     void OnEnable()
     {
@@ -75,7 +77,11 @@ public class PlayerController : MonoBehaviour
 
     }
 
-
+    void Awake()
+    {
+        skinWidth = characterController.skinWidth;
+        collider.bounds.Expand(-2 * skinWidth);
+    }
 
 
 
@@ -168,75 +174,77 @@ public class PlayerController : MonoBehaviour
         }
 
         Debug.DrawRay(transform.position, currentVelocity, Color.pink);
-        Debug.DrawRay(transform.position, transform.up, Color.blue);
+        Debug.DrawRay(transform.position, finalMove, Color.blue);
 
-        if (Physics.Raycast(transform.position, currentVelocity, out RaycastHit hit, direction.magnitude))
+        Vector3 frameMove = currentVelocity * Time.deltaTime;
+
+        if (Physics.Raycast(transform.position, frameMove, out RaycastHit hit, direction.magnitude))
         {
-            
-            Vector3 baseVector = currentVelocity.normalized * (hit.distance - characterController.skinWidth);
-            Vector3 leftoverVel = currentVelocity - baseVector; //leftover vel behind wall\
+            Vector3 baseVector = frameMove.normalized * (hit.distance - skinWidth);
+            float normalSpeed = Vector3.Dot(currentVelocity, hit.normal);
+            if (normalSpeed < 0f)
+            {
+                currentVelocity += hit.normal * -normalSpeed;
+            }
 
-            //vector to project
-            float mag = leftoverVel.magnitude;
-            leftoverVel = Vector3.ProjectOnPlane(leftoverVel, hit.normal).normalized;
-            leftoverVel *= mag; //scale correctly onto plane/wall
-
-            currentVelocity = leftoverVel;
-        }
-
-        //Final movement to apply
-        finalMove = currentVelocity + impulseVelocity;
-        finalMove.y = verticalVelocity + impulseVelocity.y;
-
-        if (!isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecayAir * Time.deltaTime));
-        if (isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
-
-        characterController.Move((finalMove) * Time.deltaTime);
-
-    }
-
-    void AirAccelerate(Vector3 direction)
-    {
-        float wishSpeed = direction.magnitude * speed;
-        maxAirSpeed = wishSpeed;
-        if (wishSpeed > 2f) wishSpeed = 2f;
-
-        float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
-        float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
-        if (addSpeed > 0f) //if there is still room to add speed
-        {
-            float accel = maxAirSpeed * airAccel * Time.deltaTime;
-            if (accel > addSpeed) accel = addSpeed;
-            accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
-            currentVelocity += direction * accel; //add to velocity
-        }
-
-        //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
-    }
-
-    void GroundAccelerate(Vector3 direction)
-    {
-
-        float wishSpeed = direction.magnitude * speed;
-        maxGroundSpeed = wishSpeed;
-        if (wishSpeed > 2f) wishSpeed = 2f;
-
-        float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
-        float addSpeed = maxGroundSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
-        if (addSpeed > 0f) //if there is still room to add speed
-        {
-            float accel = maxGroundSpeed * groundAccel * Time.deltaTime;
-            if (accel > addSpeed) accel = addSpeed;
-            accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
-            currentVelocity += direction * accel; //add to velocity
+            Debug.DrawRay(hit.point, baseVector, Color.blue);
         }
 
 
-        Vector3 friction = currentVelocity * groundFriction * Time.deltaTime;
-        currentVelocity -= friction;
 
-        //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
-    }
+            //Final movement to apply
+            finalMove = currentVelocity + impulseVelocity;
+            finalMove.y = verticalVelocity + impulseVelocity.y;
+
+            if (!isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecayAir * Time.deltaTime));
+            if (isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
+
+            characterController.Move((finalMove) * Time.deltaTime);
+
+        }
+
+        void AirAccelerate(Vector3 direction)
+        {
+            float wishSpeed = direction.magnitude * speed;
+            maxAirSpeed = wishSpeed;
+            if (wishSpeed > 2f) wishSpeed = 2f;
+
+            float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
+            float addSpeed = wishSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+            if (addSpeed > 0f) //if there is still room to add speed
+            {
+                float accel = maxAirSpeed * airAccel * Time.deltaTime;
+                if (accel > addSpeed) accel = addSpeed;
+                accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
+                currentVelocity += direction * accel; //add to velocity
+            }
+
+            //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
+        }
+
+        void GroundAccelerate(Vector3 direction)
+        {
+
+            float wishSpeed = direction.magnitude * speed;
+            maxGroundSpeed = wishSpeed;
+            if (wishSpeed > 2f) wishSpeed = 2f;
+
+            float currentSpeed = Vector3.Dot(currentVelocity, direction); //direction = wishV
+            float addSpeed = maxGroundSpeed - currentSpeed; //returns how much speed is left allowed, also wont add if result is negative
+            if (addSpeed > 0f) //if there is still room to add speed
+            {
+                float accel = maxGroundSpeed * groundAccel * Time.deltaTime;
+                if (accel > addSpeed) accel = addSpeed;
+                accel = Mathf.Min(addSpeed, accel); //apply the smaller change if any
+                currentVelocity += direction * accel; //add to velocity
+            }
+
+
+            Vector3 friction = currentVelocity * groundFriction * Time.deltaTime;
+            currentVelocity -= friction;
+
+            //Debug.Log($"CurrentVelocity: {currentSpeed}, {currentVelocity}, {finalMove}");
+        }
 
     public Vector3 AddImpulse(Vector3 direction, float force)
     {
@@ -248,5 +256,60 @@ public class PlayerController : MonoBehaviour
     }
 
 
+
+
+    /*private Vector3 CollideAndSlide(Vector3 velocity, Vector3 position, int depth, bool gravityPass, Vector3 initialVelocity)
+    {
+        if (depth >= maxBounces)
+        {
+            return Vector3.zero;
+        }
+
+        float distance = velocity.magnitude + skinWidth;
+
+        RaycastHit hit;
+        if (Physics.SphereCast(position, collider.bounds.extents.x, velocity.normalized, out hit, distance))
+        {
+            Vector3 snapToSurface = velocity.normalized * (hit.distance - skinWidth);
+            Vector3 leftoverVelocity = velocity - snapToSurface;
+            float angle = Vector3.Angle(Vector3.up, hit.normal);
+
+            if (snapToSurface.magnitude <= skinWidth)
+            {
+                snapToSurface = Vector3.zero;
+            }
+
+            if (angle < maxSlopeAngle)
+            {
+                if (gravityPass)
+                {
+                    return snapToSurface;
+                }
+                leftoverVelocity = ProjectAndScale(leftoverVelocity, hit.normal);
+            }
+            else
+            {
+                float scale = 1 - Vector3.Dot(
+                    new Vector3(hit.normal.x, 0, hit.normal.z).normalized,
+                    -new Vector3(initialVelocity.x, 0, initialVelocity.z).normalized
+                    );
+
+                leftoverVelocity = ProjectAndScale(leftoverVelocity, hit.normal) * scale;
+            }
+
+
+            return snapToSurface + CollideAndSlide(leftoverVelocity, position + snapToSurface, depth + 1, gravityPass, initialVelocity);
+        }
+
+        return velocity;
+    }
+
+    private Vector3 ProjectAndScale(Vector3 vector, Vector3 normal)
+    {
+        float mag = vector.magnitude;
+        vector = Vector3.ProjectOnPlane(vector, normal).normalized;
+        vector *= mag;
+        return vector;
+    }*/
 
 }
