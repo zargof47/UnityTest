@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         skinWidth = characterController.skinWidth;
-        collider.bounds.Expand(-2 * skinWidth);
+        //collider.bounds.Expand(-2 * skinWidth);
     }
 
 
@@ -146,18 +146,6 @@ public class PlayerController : MonoBehaviour
     {
         //Set Speed
         speed = walkSpeed;
-        /*if (isSprinting)
-        {
-            speed = runSpeed;
-        }
-        else if (!isSprinting)
-        {
-            speed = walkSpeed;
-        }*/
-
-
-        //direction = wishDir
-
         //Get direction Vector/Arrow, Clamp it under 1 to prevent faster strafing, and then apply speed
         Vector3 directionUnclamped = Quaternion.Euler(0f, camTransform.eulerAngles.y, 0f) * new Vector3(moveInput.x, 0, moveInput.y);
         //Vector3 directionUnclamped = camTransform.TransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
@@ -177,29 +165,29 @@ public class PlayerController : MonoBehaviour
         Debug.DrawRay(transform.position, finalMove, Color.blue);
 
         Vector3 frameMove = currentVelocity * Time.deltaTime;
+        float distance = frameMove.magnitude + skinWidth;
+        RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, frameMove, out RaycastHit hit, direction.magnitude))
+        //cast to the direction moving
+        if(Physics.SphereCast(transform.position, collider.bounds.extents.x, currentVelocity.normalized, out hit, distance))
         {
-            Vector3 baseVector = frameMove.normalized * (hit.distance - skinWidth);
-            float normalSpeed = Vector3.Dot(currentVelocity, hit.normal);
-            if (normalSpeed < 0f)
-            {
-                currentVelocity += hit.normal * -normalSpeed;
-            }
+            Vector3 leftoverVelocity = currentVelocity.normalized * (hit.distance - skinWidth); //distance to wall in velocity
+            Vector3 cutVelocity = currentVelocity - leftoverVelocity;
+            Vector3 projectedVelocity = Vector3.ProjectOnPlane(cutVelocity, hit.normal).normalized * cutVelocity.magnitude;
 
-            Debug.DrawRay(hit.point, baseVector, Color.blue);
+            //Debug.Log($"lv: {leftoverVelocity}, cv: {cutVelocity}, pj: {projectedVelocity}, Cv: {currentVelocity}");
+            Debug.Log("hit");
+            currentVelocity = (leftoverVelocity + projectedVelocity);
         }
 
+        //Final movement to apply
+        finalMove = currentVelocity + impulseVelocity;
+        finalMove.y = verticalVelocity + impulseVelocity.y;
 
+        if (!isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecayAir * Time.deltaTime));
+        if (isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
 
-            //Final movement to apply
-            finalMove = currentVelocity + impulseVelocity;
-            finalMove.y = verticalVelocity + impulseVelocity.y;
-
-            if (!isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecayAir * Time.deltaTime));
-            if (isGrounded) impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-impulseDecay * Time.deltaTime));
-
-            characterController.Move((finalMove) * Time.deltaTime);
+        characterController.Move((finalMove) * Time.deltaTime);
 
         }
 
