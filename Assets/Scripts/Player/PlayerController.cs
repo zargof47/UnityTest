@@ -164,7 +164,10 @@ public class PlayerController : MonoBehaviour
         Debug.DrawRay(transform.position, currentVelocity, Color.pink);
         Debug.DrawRay(transform.position, finalMove, Color.blue);
 
+        
+
         Vector3 frameMove = currentVelocity * Time.deltaTime;
+        
         float distance = frameMove.magnitude + skinWidth;
         RaycastHit hit;
 
@@ -175,9 +178,11 @@ public class PlayerController : MonoBehaviour
             Vector3 cutVelocity = currentVelocity - leftoverVelocity;
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(cutVelocity, hit.normal).normalized * cutVelocity.magnitude;
 
-            //Debug.Log($"lv: {leftoverVelocity}, cv: {cutVelocity}, pj: {projectedVelocity}, Cv: {currentVelocity}");
-            Debug.Log("hit");
+            Debug.Log($"fm: {frameMove}, lv: {leftoverVelocity}, cv: {cutVelocity}, pj: {projectedVelocity}, Cv: {currentVelocity}");
+            //Debug.Log("hit");
+            //Debug.Log(hit.collider);
             currentVelocity = (leftoverVelocity + projectedVelocity);
+            //currentVelocity.y = 0f;
         }
 
         //Final movement to apply
